@@ -1,1 +1,1 @@
-# Prediction-of-Lifestyle-DIseases
+# Prediction-of-Lifestyle-Diseases
