@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multi-Disease Risk Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f2f2f2;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="number"] {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: teal;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 5px #ccc;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Early Prediction of Lifestyle Diseases</h1>
+
+    <form id="predictionForm">
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input type="number" id="age" required>
+        </div>
+        <div class="form-group">
+            <label for="bmi">BMI</label>
+            <input type="number" step="0.1" id="bmi" required>
+        </div>
+        <div class="form-group">
+            <label for="bp">Blood Pressure</label>
+            <input type="number" id="bp" required>
+        </div>
+        <div class="form-group">
+            <label for="glucose">Glucose Level</label>
+            <input type="number" id="glucose" required>
+        </div>
+        <div class="form-group">
+            <label for="cholesterol">Cholesterol Level</label>
+            <input type="number" id="cholesterol" required>
+        </div>
+        <div class="form-group">
+            <label for="smoking">Smoking (0 = No, 1 = Yes)</label>
+            <input type="number" id="smoking" min="0" max="1" required>
+        </div>
+        <div class="form-group">
+            <label for="alcohol">Alcohol Consumption (0 = No, 1 = Yes)</label>
+            <input type="number" id="alcohol" min="0" max="1" required>
+        </div>
+        <div class="form-group">
+            <label for="physical_activity">Physical Activity (0 = No, 1 = Yes)</label>
+            <input type="number" id="physical_activity" min="0" max="1" required>
+        </div>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const data = {
+                age: parseInt(document.getElementById('age').value),
+                bmi: parseFloat(document.getElementById('bmi').value),
+                bp: parseInt(document.getElementById('bp').value),
+                glucose: parseInt(document.getElementById('glucose').value),
+                cholesterol: parseInt(document.getElementById('cholesterol').value),
+                smoking: parseInt(document.getElementById('smoking').value),
+                alcohol: parseInt(document.getElementById('alcohol').value),
+                physical_activity: parseInt(document.getElementById('physical_activity').value)
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                let output = '<h3>Prediction Results:</h3>';
+                for (const [disease, data] of Object.entries(result)) {
+                    output += `<p><strong>${disease}:</strong> ${data.Risk}</p>`;
+                    if (data.Risk === "Positive") {
+                        output += `<ul>`;
+                        data.Tips.forEach(tip => {
+                            output += `<li>${tip}</li>`;
+                        });
+                        output += `</ul>`;
+                        output += `<p><a href="${data.LearnMore}" target="_blank">Learn More</a></p>`;
+                    }
+                }
+                resultDiv.innerHTML = output;
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<p style="color:red;">Error: ${error}</p>`;
+            });
+        });
+    </script>
+
+</body>
+</html>
